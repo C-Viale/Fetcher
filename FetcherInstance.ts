@@ -1,70 +1,69 @@
-import { FetcherConfig, FetcherConstructorParams } from "./types";
-import dispatch from "./dispatch";
+import { dispatch } from "./dispatch";
+import type {
+  FetcherBodylessRequestArgs,
+  FetcherConfig,
+  FetcherConstructorArgs,
+  FetcherRequestArgs,
+} from "./types";
+
+function buildConfig(
+  config: FetcherConfig | undefined,
+  defaultHeaders: Record<string, string>
+) {
+  return {
+    ...config,
+    headers: {
+      ...defaultHeaders,
+      ...config?.headers,
+    },
+  };
+}
 
 export default class FetcherInstance {
   defaultHeaders: Record<string, string> = {};
   baseURL?: string;
 
-  constructor({ defaultHeaders = {}, baseURL }: FetcherConstructorParams) {
+  constructor({ defaultHeaders = {}, baseURL }: FetcherConstructorArgs) {
     this.defaultHeaders = defaultHeaders;
     this.baseURL = baseURL;
   }
 
-  async get(url: string, config?: FetcherConfig) {
-    return await dispatch({
+  async get<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
       method: "GET",
-      url: `${this.baseURL}${url}`,
-      config: {
-        ...config,
-        headers: {
-          ...this.defaultHeaders,
-          ...config?.headers,
-        },
-      },
+      url: `${this.baseURL}${args.url}`,
+      config: buildConfig(args.config, this.defaultHeaders),
     });
   }
-
-  async post(url: string, data?: BodyInit, config?: FetcherConfig) {
-    return await dispatch({
-      method: "GET",
-      data,
-      url: `${this.baseURL}${url}`,
-      config: {
-        ...config,
-        headers: {
-          ...this.defaultHeaders,
-          ...config?.headers,
-        },
-      },
-    });
-  }
-
-  async put(url: string, data?: any, config?: FetcherConfig) {
-    return await dispatch({
-      method: "PUT",
-      data,
-      url: `${this.baseURL}${url}`,
-      config: {
-        ...config,
-        headers: {
-          ...this.defaultHeaders,
-          ...config?.headers,
-        },
-      },
-    });
-  }
-
-  async delete(url: string, config?: FetcherConfig) {
-    return await dispatch({
+  async delete<T = unknown>(args: FetcherBodylessRequestArgs) {
+    return dispatch<T>({
       method: "DELETE",
-      url: `${this.baseURL}${url}`,
-      config: {
-        ...config,
-        headers: {
-          ...this.defaultHeaders,
-          ...config?.headers,
-        },
-      },
+      url: `${this.baseURL}${args.url}`,
+      config: buildConfig(args.config, this.defaultHeaders),
+    });
+  }
+  async post<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
+      method: "POST",
+      url: `${this.baseURL}${args.url}`,
+      data: args.data,
+      config: buildConfig(args.config, this.defaultHeaders),
+    });
+  }
+  async put<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
+      method: "PUT",
+      url: `${this.baseURL}${args.url}`,
+      data: args.data,
+      config: buildConfig(args.config, this.defaultHeaders),
+    });
+  }
+  async patch<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
+      method: "PATCH",
+      url: `${this.baseURL}${args.url}`,
+      data: args.data,
+      config: buildConfig(args.config, this.defaultHeaders),
     });
   }
 }

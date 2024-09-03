@@ -1,4 +1,36 @@
-export type HTTPMethods = 'GET' | 'HEAD' |  'POST' | 'PUT' | 'DELETE' | 'CONNECT'  | 'OPTIONS' | 'TRACE' | 'PATCH'
+export interface DispatchArgs {
+  method: HTTPMethods;
+  url: string;
+  data?: BodyInit;
+  config?: FetcherConfig;
+}
+
+export interface FetcherRequestArgs {
+  url: string;
+  config?: FetcherConfig;
+  data?: BodyInit;
+}
+
+export interface FetcherBodylessRequestArgs {
+  url: string;
+  config?: FetcherConfig;
+}
+
+export interface FetcherConstructorArgs {
+  baseURL?: string;
+  defaultHeaders?: Record<string, string>;
+}
+
+export type HTTPMethods =
+  | "GET"
+  | "HEAD"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  | "CONNECT"
+  | "OPTIONS"
+  | "TRACE"
+  | "PATCH";
 
 export interface FetcherConfig {
   cache?: RequestCache;
@@ -14,21 +46,10 @@ export interface FetcherConfig {
   window?: null;
 }
 
-export interface FetcherResponse {
-  url: string,
-  headers: Headers,
-  ok: boolean,
-  redirected: boolean,
-  status: number,
-  statusText: string,
-  type: string,
-  bodyUser: boolean,
-  body: Record<string, unknown> | null,
-  text: string | null,
-}
-
-
-export interface FetcherConstructorParams {
-  baseURL?: string;
-  defaultHeaders?: Record<string, string>
+export interface FetcherResponse<T = unknown> {
+  url: string;
+  headers: Headers;
+  status: number;
+  statusText: string;
+  data: T;
 }

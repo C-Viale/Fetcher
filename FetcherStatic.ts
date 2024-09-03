@@ -1,40 +1,43 @@
-import dispatch from "./dispatch";
-import { FetcherConfig } from "./types";
+import { dispatch } from "./dispatch";
+import type { FetcherBodylessRequestArgs, FetcherRequestArgs } from "./types";
 
-const FetcherStatic = {
-  get: async (url: string, config?: FetcherConfig) => {
-    return await dispatch({
+export default class FetcherStatic {
+  static async get<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
       method: "GET",
-      url,
-      config,
+      url: args.url,
+      config: args.config,
     });
-  },
-
-  post: async (url: string, data?: BodyInit, config?: FetcherConfig) => {
-    return await dispatch({
-      method: "GET",
-      data,
-      url,
-      config,
-    });
-  },
-
-  put: async (url: string, data?: any, config?: FetcherConfig) => {
-    return await dispatch({
-      method: "PUT",
-      data,
-      url,
-      config,
-    });
-  },
-
-  delete: async (url: string, config?: FetcherConfig) => {
-    return await dispatch({
+  }
+  static async delete<T = unknown>(args: FetcherBodylessRequestArgs) {
+    return dispatch<T>({
       method: "DELETE",
-      url,
-      config,
+      url: args.url,
+      config: args.config,
     });
-  },
-};
-
-export default FetcherStatic;
+  }
+  static async post<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
+      method: "POST",
+      url: args.url,
+      data: args.data,
+      config: args.config,
+    });
+  }
+  static async put<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
+      method: "PUT",
+      url: args.url,
+      data: args.data,
+      config: args.config,
+    });
+  }
+  static async patch<T = unknown>(args: FetcherRequestArgs) {
+    return dispatch<T>({
+      method: "PATCH",
+      url: args.url,
+      data: args.data,
+      config: args.config,
+    });
+  }
+}

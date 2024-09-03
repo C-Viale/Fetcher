@@ -1,8 +1,11 @@
 import FetcherInstance from "./FetcherInstance";
-import { FetcherConstructorParams } from "./types";
+import type { FetcherConstructorArgs } from "./types";
 
-export function createInstance(config: FetcherConstructorParams) {
+export { default as Fetcher } from "./FetcherStatic";
+export { FetcherError } from "./error";
+
+export function createInstance(config: FetcherConstructorArgs) {
   return new FetcherInstance(config);
 }
 
-export { default as Fetcher } from "./FetcherStatic";
+export type * from "./types";

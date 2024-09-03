@@ -1,19 +1,13 @@
-import { FetcherConfig, FetcherResponse, HTTPMethods } from "./types";
+import { FetcherError } from "./error";
+import type { DispatchArgs, FetcherResponse } from "./types";
 
-interface DispatchArgs {
-  method: HTTPMethods;
-  url: string;
-  data?: BodyInit;
-  config?: FetcherConfig;
-}
-
-export default async function dispatch({
+export async function dispatch<T = unknown>({
   method,
   url,
   data,
   config = {},
-}: DispatchArgs): Promise<FetcherResponse> {
-  let requestInit: RequestInit = {
+}: DispatchArgs) {
+  const requestInit: RequestInit = {
     method,
     body: null,
     keepalive: true,
@@ -27,35 +21,49 @@ export default async function dispatch({
     },
   };
 
-  if (data instanceof FormData) requestInit.body = data;
+  if (data instanceof FormData || typeof data == "string") {
+    requestInit.body = data;
+  }
 
-  if (data != null && (typeof data === "object" || Array.isArray(data)))
+  if (data != null && typeof data === "object") {
     requestInit.body = JSON.stringify(data);
-
-  const response = await fetch(`${url}`, requestInit);
-
-  const contentType = response.headers.get("Content-Type");
-
-  let result: FetcherResponse = {
-    url: response.url,
-    headers: response.headers,
-    ok: response.ok,
-    redirected: response.redirected,
-    status: response.status,
-    statusText: response.statusText,
-    type: response.type,
-    bodyUser: response.bodyUsed,
-    body: null,
-    text: null,
-  };
-
-  if (contentType?.includes("application/json")) {
-    result.body = await response.json();
   }
 
-  if (contentType?.includes("text/")) {
-    result.text = await response.text();
-  }
+  const request = new Request(url, requestInit);
 
-  return result;
+  try {
+    const response = await fetch(request);
+
+    const contentType = response.headers.get("Content-Type");
+
+    let data: unknown = null;
+    
+    if (contentType?.includes("application/json")) {
+      data = await response.json();
+    }
+    if (contentType?.includes("text/")) {
+      data = await response.text();
+    }
+
+    const result: FetcherResponse<T> = {
+      url: response.url,
+      data: (data ?? null) as T,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    };
+
+    if (!response.ok) {
+      throw new FetcherError({
+        message: `${response.status} (${response.statusText})`,
+        response: result,
+      });
+    }
+
+    return result;
+  } catch (error) {
+    if (error instanceof FetcherError) throw error;
+    if (error instanceof Error)
+      throw new FetcherError({ message: error.message, request });
+  }
 }
