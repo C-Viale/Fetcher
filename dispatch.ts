@@ -36,18 +36,18 @@ export async function dispatch<T = unknown>({
 
     const contentType = response.headers.get("Content-Type");
 
-    let data: unknown = null;
+    let responseData: unknown = null;
     
     if (contentType?.includes("application/json")) {
-      data = await response.json();
+      responseData = await response.json();
     }
     if (contentType?.includes("text/")) {
-      data = await response.text();
+      responseData = await response.text();
     }
 
     const result: FetcherResponse<T> = {
       url: response.url,
-      data: (data ?? null) as T,
+      data: (responseData ?? null) as T,
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
