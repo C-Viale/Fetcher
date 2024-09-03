@@ -1,14 +1,14 @@
 export interface DispatchArgs {
   method: HTTPMethods;
   url: string;
-  data?: BodyInit;
+  data?: BodyInit | object;
   config?: FetcherConfig;
 }
 
 export interface FetcherRequestArgs {
   url: string;
   config?: FetcherConfig;
-  data?: BodyInit;
+  data?: BodyInit | object;
 }
 
 export interface FetcherBodylessRequestArgs {
