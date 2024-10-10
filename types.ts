@@ -3,6 +3,7 @@ export interface DispatchArgs {
   url: string;
   data?: BodyInit | object;
   config?: FetcherConfig;
+  onError?: OnErrorHandler;
 }
 
 export interface FetcherRequestArgs {
@@ -19,6 +20,7 @@ export interface FetcherBodylessRequestArgs {
 export interface FetcherConstructorArgs {
   baseURL?: string;
   defaultHeaders?: Record<string, string>;
+  onError?: OnErrorHandler;
 }
 
 export type HTTPMethods =
@@ -53,3 +55,6 @@ export interface FetcherResponse<T = unknown> {
   statusText: string;
   data: T;
 }
+
+export type ErrorResult = { statusCode: number | null };
+export type OnErrorHandler = (result: ErrorResult) => void;

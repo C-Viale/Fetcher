@@ -4,12 +4,10 @@ import type {
   FetcherConfig,
   FetcherConstructorArgs,
   FetcherRequestArgs,
+  OnErrorHandler,
 } from "./types";
 
-function buildConfig(
-  config: FetcherConfig | undefined,
-  defaultHeaders: Record<string, string>
-) {
+function buildConfig(config: FetcherConfig | undefined, defaultHeaders: Record<string, string>) {
   return {
     ...config,
     headers: {
@@ -22,10 +20,12 @@ function buildConfig(
 export default class FetcherInstance {
   defaultHeaders: Record<string, string> = {};
   baseURL?: string;
+  onError?: OnErrorHandler;
 
-  constructor({ defaultHeaders = {}, baseURL }: FetcherConstructorArgs) {
+  constructor({ defaultHeaders = {}, baseURL, onError }: FetcherConstructorArgs) {
     this.defaultHeaders = defaultHeaders;
     this.baseURL = baseURL;
+    this.onError = onError;
   }
 
   async get<T = unknown>(args: FetcherRequestArgs) {
@@ -33,6 +33,7 @@ export default class FetcherInstance {
       method: "GET",
       url: `${this.baseURL}${args.url}`,
       config: buildConfig(args.config, this.defaultHeaders),
+      onError: this.onError,
     });
   }
   async delete<T = unknown>(args: FetcherBodylessRequestArgs) {
@@ -40,6 +41,7 @@ export default class FetcherInstance {
       method: "DELETE",
       url: `${this.baseURL}${args.url}`,
       config: buildConfig(args.config, this.defaultHeaders),
+      onError: this.onError,
     });
   }
   async post<T = unknown>(args: FetcherRequestArgs) {
@@ -48,6 +50,7 @@ export default class FetcherInstance {
       url: `${this.baseURL}${args.url}`,
       data: args.data,
       config: buildConfig(args.config, this.defaultHeaders),
+      onError: this.onError,
     });
   }
   async put<T = unknown>(args: FetcherRequestArgs) {
@@ -56,6 +59,7 @@ export default class FetcherInstance {
       url: `${this.baseURL}${args.url}`,
       data: args.data,
       config: buildConfig(args.config, this.defaultHeaders),
+      onError: this.onError,
     });
   }
   async patch<T = unknown>(args: FetcherRequestArgs) {
@@ -64,6 +68,7 @@ export default class FetcherInstance {
       url: `${this.baseURL}${args.url}`,
       data: args.data,
       config: buildConfig(args.config, this.defaultHeaders),
+      onError: this.onError,
     });
   }
 }

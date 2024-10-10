@@ -1,4 +1,5 @@
 import { FetcherError } from "./error";
+import { statusMessages } from "./messages";
 import type { DispatchArgs, FetcherResponse } from "./types";
 
 export async function dispatch<T = unknown>({
@@ -6,6 +7,7 @@ export async function dispatch<T = unknown>({
   url,
   data,
   config = {},
+  onError,
 }: DispatchArgs) {
   const requestInit: RequestInit = {
     method,
@@ -31,13 +33,15 @@ export async function dispatch<T = unknown>({
 
   const request = new Request(url, requestInit);
 
+  let result: FetcherResponse<T>;
+
   try {
     const response = await fetch(request);
 
     const contentType = response.headers.get("Content-Type");
 
     let responseData: unknown = null;
-    
+
     if (contentType?.includes("application/json")) {
       responseData = await response.json();
     }
@@ -45,25 +49,36 @@ export async function dispatch<T = unknown>({
       responseData = await response.text();
     }
 
-    const result: FetcherResponse<T> = {
+    const statusText = statusMessages[response.status.toString()];
+
+    result = {
       url: response.url,
       data: (responseData ?? null) as T,
       status: response.status,
-      statusText: response.statusText,
+      statusText,
       headers: response.headers,
     };
 
     if (!response.ok) {
       throw new FetcherError({
-        message: `${response.status} (${response.statusText})`,
+        message: `${response.status} (${statusText})`,
         response: result,
       });
     }
 
     return result;
   } catch (error) {
-    if (error instanceof FetcherError) throw error;
-    if (error instanceof Error)
+    if (error instanceof FetcherError) {
+      onError?.({ statusCode: error.response?.status || null });
+      throw error;
+    }
+    if (error instanceof Error) {
+      onError?.({ statusCode: null });
       throw new FetcherError({ message: error.message, request });
+    }
+
+    onError?.({ statusCode: null });
   }
+
+  return result!;
 }
